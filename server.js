@@ -6,6 +6,9 @@ const orderRoutes = require('./routes/orderRoutes'); // Import your routes
 const reviewRoutes = require('./routes/reviewRoutes'); // review routes
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const productRoutes = require('./routes/productRoutes');
+const uploadRoutes = require('./routes/uploadRoutes');
+const authRoutes = require('./routes/authRoutes');
+
 // Load the secret variables from the .env file
 dotenv.config(); 
 
@@ -18,6 +21,12 @@ const app = express();
 // Middleware to allow your server to read JSON data
 app.use(express.json());
 
+// simple request logger for debugging
+app.use((req, res, next) => {
+  console.log(`Incoming ${req.method} ${req.url}`);
+  next();
+});
+
 // Root endpoint
 app.get('/', (req, res) => {
   res.json({ message: 'Server running successfully', status: 'online' });
@@ -29,6 +38,9 @@ app.use('/api/orders', orderRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api', uploadRoutes);
+app.use('/api/auth', authRoutes);
+
 // Set the port (use the one from .env, or default to 5000)
 const PORT = process.env.PORT || 5000;
 
