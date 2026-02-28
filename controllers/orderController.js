@@ -76,4 +76,76 @@ const getOrders = async (req, res) => {
     }
 };
 
-module.exports = { createOrder, getOrders };
+// 4. Get order by ID
+const getOrderById = async (req, res) => {
+    try {
+        const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+        res.json(order);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// 5. Update order status
+const updateOrderStatus = async (req, res) => {
+    try {
+        const { status } = req.body;
+
+        const validStatuses = ['Pending', 'Processing', 'Shipped', 'Delivered', 'Cancelled'];
+        if (!validStatuses.includes(status)) {
+            return res.status(400).json({ message: 'Invalid status value' });
+        }
+
+        const order = await Order.findById(req.params.id);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        order.status = status;
+        await order.save();
+
+        if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+            const mailOptions = {
+                from: process.env.EMAIL_USER,
+                to: order.customerEmail,
+                subject: `Order Status Update - ${status}`,
+                html: `
+                    <h3>Hello ${order.customerName},</h3>
+                    <p>Your order status has been updated to: <strong>${status}</strong></p>
+                    <p>Order Details:</p>
+                    <ul>
+                        <li>Product: ${order.productName}</li>
+                        <li>Total: $${order.totalPrice}</li>
+                        <li>Status: ${status}</li>
+                    </ul>
+                `
+            };
+
+            try {
+                await transporter.sendMail(mailOptions);
+            } catch (emailErr) {
+                console.error('Failed to send status update email:', emailErr);
+            }
+        }
+
+        res.json({ message: 'Order status updated successfully', order });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+// 6. Get orders by customer email
+const getOrdersByCustomer = async (req, res) => {
+    try {
+        const { email } = req.params;
+        const orders = await Order.find({ customerEmail: email }).sort({ createdAt: -1 });
+        res.json({ count: orders.length, orders });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
+module.exports = { createOrder, getOrders, getOrderById, updateOrderStatus, getOrdersByCustomer };

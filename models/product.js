@@ -16,7 +16,10 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true
-    }
+    },
+    images: [{ type: String }],
+    stock: { type: Number, default: 0 },
+    isApproved: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);
