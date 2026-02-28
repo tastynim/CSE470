@@ -2,51 +2,41 @@
 const express = require('express');
 const dotenv = require('dotenv');
 const connectDB = require('./config/db.js');
-const orderRoutes = require('./routes/orderRoutes'); // Import your routes
-const reviewRoutes = require('./routes/reviewRoutes'); // review routes
+const orderRoutes = require('./routes/orderRoutes');
+const reviewRoutes = require('./routes/reviewRoutes');
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const productRoutes = require('./routes/productRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
+const cartRoutes = require('./routes/cartRoutes'); // ← ADD THIS
 
-// Load the secret variables from the .env file
 dotenv.config(); 
-
-// Connect to MongoDB
 connectDB();     
 
-// Initialize the Express app
 const app = express();
 
-// Middleware to allow your server to read JSON data
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
 
-// simple request logger for debugging
 app.use((req, res, next) => {
   console.log(`Incoming ${req.method} ${req.url}`);
   next();
 });
 
-// Root endpoint
 app.get('/', (req, res) => {
   res.json({ message: 'Server running successfully', status: 'online' });
 });
 
-// Tell the app to use the order routes we created
 app.use('/api/orders', orderRoutes);
-// reviews
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/cart', cartRoutes); // ← ADD THIS
 
-// Set the port (use the one from .env, or default to 5000)
 const PORT = process.env.PORT || 5000;
 
-// --- THIS IS WHERE APP.LISTEN GOES! ---
-// It turns the server on at the very end
 app.listen(PORT, () => {
     console.log(`Server running successfully on port ${PORT}`);
 });
-
