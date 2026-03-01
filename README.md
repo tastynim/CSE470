@@ -54,5 +54,3 @@ Response includes `instructions` to show to the customer.
 Routes remain unchanged (see `server.js` for a list).
 
 ---
-
-Feel free to expand or ask for more features!
