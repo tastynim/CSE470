@@ -8,6 +8,7 @@ const analyticsRoutes = require('./routes/analyticsRoutes');
 const productRoutes = require('./routes/productRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 
 // Load the secret variables from the .env file
 dotenv.config(); 
@@ -40,6 +41,8 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api/auth', authRoutes);
+// payment endpoints
+app.use('/api/payments', paymentRoutes);
 
 // Set the port (use the one from .env, or default to 5000)
 const PORT = process.env.PORT || 5000;
