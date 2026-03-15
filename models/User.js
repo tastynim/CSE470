@@ -7,7 +7,8 @@ const userSchema = new mongoose.Schema({
     role: { type: String, default: 'customer' },
     isRural: { type: Boolean, default: false }, 
     location: { type: String },                
-    skills: [{ type: String }]                  
+    skills: [{ type: String }],
+    isApproved: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);;

@@ -16,7 +16,8 @@ const productSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true
-    }
+    },
+    isApproved: { type: Boolean, default: false }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Product', productSchema);
