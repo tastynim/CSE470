@@ -1,6 +1,8 @@
 // server.js
 const express = require('express');
+const http = require('http');
 const dotenv = require('dotenv');
+const { Server } = require('socket.io');
 const connectDB = require('./config/db.js');
 const orderRoutes = require('./routes/orderRoutes'); // Import your routes
 const reviewRoutes = require('./routes/reviewRoutes'); // review routes
@@ -18,6 +20,30 @@ connectDB();
 
 // Initialize the Express app
 const app = express();
+const server = http.createServer(app);
+
+// 2. Attach Socket.io to that server
+const io = new Server(server, {
+    cors: {
+        origin: "*", // Allow any frontend to connect for now
+        methods: ["GET", "POST"]
+    }
+});
+io.on('connection', (socket) => {
+    console.log('A user connected! Socket ID:', socket.id);
+
+    // Listen for a message from a customer or entrepreneur
+    socket.on('send_message', (data) => {
+        console.log('Message received:', data);
+        
+        // Broadcast the message back out to the recipient
+        io.emit('receive_message', data); 
+    });
+
+    socket.on('disconnect', () => {
+        console.log('User disconnected:', socket.id);
+    });
+});
 
 // Middleware to allow your server to read JSON data
 app.use(express.json());
