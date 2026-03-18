@@ -16,6 +16,7 @@ const productRoutes = require('./routes/productRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
 const messageRoutes = require('./routes/messageRoutes');
+const storyRoutes = require('./routes/storyRoutes');
 
 // Load the secret variables from the .env file
 dotenv.config(); 
@@ -88,6 +89,7 @@ app.use('/api/products', productRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/stories', storyRoutes);
 
 // Set the port (use the one from .env, or default to 5000)
 const PORT = process.env.PORT || 5000;
