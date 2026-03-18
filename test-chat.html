@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+</head>
+<body>
+    <h2>Real-Time Chat Tester</h2>
+    <button onclick="sendTestMessage()">Send "Hello Server!"</button>
+
+    <script>
+        // 1. Connect to your backend server
+        const socket = io('http://localhost:5000');
+
+        // 2. Listen for a successful connection
+        socket.on('connect', () => {
+            console.log('Connected to server with ID:', socket.id);
+        });
+
+        // 3. Function to send a message when you click the button
+        function sendTestMessage() {
+            socket.emit('send_message', { text: "Hello from the frontend!" });
+            console.log("Message sent!");
+        }
+
+        // 4. Listen for messages coming BACK from the server
+        socket.on('receive_message', (data) => {
+            console.log("Server broadcasted:", data);
+            alert("The server successfully bounced the message back!");
+        });
+    </script>
+</body>
+</html>
