@@ -2,15 +2,19 @@
 const express = require('express');
 const http = require('http');
 const dotenv = require('dotenv');
-const { Server } = require('socket.io');
+const { Server } = require('socket.io'); 
 const connectDB = require('./config/db.js');
-const orderRoutes = require('./routes/orderRoutes'); // Import your routes
-const reviewRoutes = require('./routes/reviewRoutes'); // review routes
+
+// Import your database models
+const Message = require('./models/Message'); // Import the new Message model
+
+// Import your routes
+const orderRoutes = require('./routes/orderRoutes'); 
+const reviewRoutes = require('./routes/reviewRoutes'); 
 const analyticsRoutes = require('./routes/analyticsRoutes');
 const productRoutes = require('./routes/productRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const authRoutes = require('./routes/authRoutes');
-const paymentRoutes = require('./routes/paymentRoutes');
 
 // Load the secret variables from the .env file
 dotenv.config(); 
@@ -22,22 +26,38 @@ connectDB();
 const app = express();
 const server = http.createServer(app);
 
-// 2. Attach Socket.io to that server
+// Attach Socket.io to the server
 const io = new Server(server, {
     cors: {
         origin: "*", // Allow any frontend to connect for now
         methods: ["GET", "POST"]
     }
 });
+
+// Handle real-time WebSocket connections
 io.on('connection', (socket) => {
     console.log('A user connected! Socket ID:', socket.id);
 
     // Listen for a message from a customer or entrepreneur
-    socket.on('send_message', (data) => {
-        console.log('Message received:', data);
+    socket.on('send_message', async (data) => {
+        console.log('Message received from frontend:', data);
         
-        // Broadcast the message back out to the recipient
-        io.emit('receive_message', data); 
+        try {
+            // 1. Create and save the message to MongoDB
+            const newMessage = new Message({
+                sender: data.sender,     
+                receiver: data.receiver, 
+                text: data.text
+            });
+            
+            await newMessage.save(); // Wait for it to save to the database
+            console.log('Success! Message permanently saved to database.');
+
+            // 2. Broadcast the newly saved message back out to the recipient
+            io.emit('receive_message', newMessage); 
+        } catch (error) {
+            console.error("Error saving message:", error.message);
+        }
     });
 
     socket.on('disconnect', () => {
@@ -48,7 +68,7 @@ io.on('connection', (socket) => {
 // Middleware to allow your server to read JSON data
 app.use(express.json());
 
-// simple request logger for debugging
+// Simple request logger for debugging standard API routes
 app.use((req, res, next) => {
   console.log(`Incoming ${req.method} ${req.url}`);
   next();
@@ -59,23 +79,19 @@ app.get('/', (req, res) => {
   res.json({ message: 'Server running successfully', status: 'online' });
 });
 
-// Tell the app to use the order routes we created
+// Tell the app to use the routes we created
 app.use('/api/orders', orderRoutes);
-// reviews
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api', uploadRoutes);
 app.use('/api/auth', authRoutes);
-// payment endpoints
-app.use('/api/payments', paymentRoutes);
 
 // Set the port (use the one from .env, or default to 5000)
 const PORT = process.env.PORT || 5000;
 
-// --- THIS IS WHERE APP.LISTEN GOES! ---
-// It turns the server on at the very end
+// Start the server (MUST be server.listen for Socket.io to work)
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
-
+ 
