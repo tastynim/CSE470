@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Chat Test</title>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        button { padding: 10px 15px; font-size: 16px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h2>Real-Time Chat Tester</h2>
+    <p>Click the button below to send a test message to the server and save it to MongoDB.</p>
+    
+    <button onclick="sendTestMessage()">Send Test Message</button>
+
+    <script>
+        // 1. Connect to your backend server
+        const socket = io('http://localhost:5000');
+
+        // 2. Listen for a successful connection
+        socket.on('connect', () => {
+            console.log('Connected to server with ID:', socket.id);
+        });
+
+        // 3. Function to send a message when you click the button
+        function sendTestMessage() {
+            // We are using fake 24-character IDs to satisfy MongoDB's ObjectId requirement
+            const messageData = { 
+                sender: "111111111111111111111111",   
+                receiver: "222222222222222222222222", 
+                text: "Please save me to the database!" 
+            };
+
+            socket.emit('send_message', messageData);
+            console.log("Message sent to server:", messageData);
+        }
+
+        // 4. Listen for messages coming BACK from the server (after saving to DB)
+        socket.on('receive_message', (data) => {
+            console.log("Server successfully broadcasted:", data);
+            alert("Success! The server saved the message and bounced it back!");
+        });
+    </script>
+</body>
+</html>
