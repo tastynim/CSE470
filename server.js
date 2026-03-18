@@ -75,7 +75,7 @@ const PORT = process.env.PORT || 5000;
 
 // --- THIS IS WHERE APP.LISTEN GOES! ---
 // It turns the server on at the very end
-app.listen(PORT, () => {
-    console.log(`Server running successfully on port ${PORT}`);
+server.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
 });
 
